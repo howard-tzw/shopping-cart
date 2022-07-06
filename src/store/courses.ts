@@ -35,8 +35,17 @@ export const useCourseStore = defineStore({
   actions: {
     async fetchAll() {
       if (this.loaded) return
-
-      const courses = await getCourses()
+      let courses: Course[]
+      try {
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            resolve('')
+          }, 2000)
+        })
+        courses = await getCourses()
+      } catch (e: any) {
+        throw new Error(e)
+      }
       this.ids = courses.map((course: Course) => {
         this.items[course.id] = course
         return course.id

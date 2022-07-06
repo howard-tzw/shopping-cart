@@ -1,85 +1,50 @@
 import { defineStore } from 'pinia'
 import { CART_STORAGE } from '../composables/usePersistCart'
 import { useCourseStore } from './courses'
-
-export interface Purchase {
-  productId: number
-  quantity: number
-}
+import { Course } from './courses'
 
 interface CartState {
-  contents: Record<string, Purchase>
-}
-
-export interface CartPreview {
-  id: number
-  image: string
-  title: string
-  quantity: number
-  cost: number
+  items: Record<string, Course>
 }
 
 export const useCartStore = defineStore({
   id: 'cart',
 
   state: (): CartState => ({
-    contents: JSON.parse(localStorage.getItem(CART_STORAGE) as string) ?? {},
+    items: {},
   }),
 
   getters: {
     count(): number {
-      return Object.keys(this.contents).reduce((acc, id) => {
-        return acc + this.contents[id].quantity
-      }, 0)
+      return Object.keys(this.items).length
     },
-
-    total(): number {
-      const courses = useCourseStore()
-      return Object.keys(this.contents).reduce((acc, id) => {
-        return acc + Number(courses.items[id].price) * this.contents[id].quantity
-      }, 0)
-    },
-
-    formattedCart(): CartPreview[] {
+    formattedCart(): Course[] {
       const courses = useCourseStore()
 
       if (!courses.loaded) return []
 
-      return Object.keys(this.contents).map(productId => {
-        const purchase = this.contents[productId]
-
-        return {
-          id: purchase.productId,
-          image: courses.items[purchase.productId].picture,
-          title: courses.items[purchase.productId].title,
-          quantity: purchase.quantity,
-          cost: purchase.quantity * Number(courses.items[purchase.productId].price),
-        }
+      return Object.keys(this.items).map(id => {
+        return courses.items[id]
       })
     },
-  },
-
-  actions: {
-    add(productId: number) {
-      if (this.contents[productId]) {
-        this.contents[productId].quantity += 1
-      } else {
-        this.contents[productId] = {
-          productId,
-          quantity: 1,
-        }
-      }
+    totalCost(): number {
+      const courses = useCourseStore()
+      return Object.keys(this.items).reduce((acc, id) => {
+        return acc + Number(courses.items[id].price)
+      }, 0)
     },
-    remove(productId: number) {
-      if (!this.contents[productId]) {
+  },
+  actions: {
+    add(id: number) {
+      const courseStore = useCourseStore()
+      this.items[id] = courseStore.items[id]
+    },
+    remove(id: number) {
+      if (!this.items[id]) {
         return
       }
 
-      this.contents[productId].quantity -= 1
-
-      if (this.contents[productId].quantity === 0) {
-        delete this.contents[productId]
-      }
+      delete this.items[id]
     },
   },
 })
