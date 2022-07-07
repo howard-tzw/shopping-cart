@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
-import { CART_STORAGE } from '../composables/usePersistCart'
 import { useCourseStore } from './courses'
 import { Course } from './courses'
 
 interface CartState {
   items: Record<string, Course>
+  selectedIds: number[]
 }
 
 export const useCartStore = defineStore({
@@ -12,6 +12,7 @@ export const useCartStore = defineStore({
 
   state: (): CartState => ({
     items: {},
+    selectedIds: [],
   }),
 
   getters: {
@@ -45,6 +46,35 @@ export const useCartStore = defineStore({
       }
 
       delete this.items[id]
+
+      if (this.selectedIds.includes(id)) {
+        this.deselect(id)
+      }
+    },
+    removeAll() {
+      this.items = {}
+    },
+    removeSelected() {
+      this.selectedIds.forEach(id => {
+        this.remove(id)
+      })
+      this.selectedIds = []
+    },
+    select(id: number) {
+      if (this.selectedIds.includes(id)) return
+      this.selectedIds.push(id)
+    },
+    deselect(id: number) {
+      if (!this.selectedIds.includes(id)) return
+      this.selectedIds = this.selectedIds.filter(i => i !== id)
+    },
+    selectAll() {
+      Object.keys(this.items).forEach(id => {
+        this.select(Number(id))
+      })
+    },
+    deselectAll() {
+      this.selectedIds = []
     },
   },
 })

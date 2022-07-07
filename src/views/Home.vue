@@ -13,5 +13,7 @@ import CourseCardSkeleton from '@/components/CourseCardSkeleton.vue'
 import { useCourseStore } from '@/store/courses'
 
 const courseStore = useCourseStore()
+courseStore.fetchAll()
+
 const courses = computed(() => courseStore.list)
 </script>

@@ -37,11 +37,11 @@ export const useCourseStore = defineStore({
       if (this.loaded) return
       let courses: Course[]
       try {
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            resolve('')
-          }, 2000)
-        })
+        // await new Promise((resolve, reject) => {
+        //   setTimeout(() => {
+        //     resolve('')
+        //   }, 2000)
+        // })
         courses = await getCourses()
       } catch (e: any) {
         throw new Error(e)
